@@ -1,0 +1,26 @@
+{
+  "last_run": {
+    "attorney": "Dave",
+    "chapter_idx": 0,
+    "truth_score": 0,
+    "shield_score": 0
+  },
+  "certificates": [
+    "Tyrone \u2014 CASE 1: THE INVESTOR'S DILEMMA: Fiduciary duty, investor transparency, and due diligence.",
+    "Dave \u2014 CASE 1: THE FRAUDULENT FORTUNE: Honesty, transparency, and financial accountability.",
+    "Dave \u2014 CASE 2: THE PRICE OF SILENCE: Employee rights, workplace fairness, and ethical leadership.",
+    "Dave \u2014 CASE 5: THE LAST OBJECTION: Corporate governance, accountability, and ethical leadership.",
+    "Dave \u2014 CASE 1: THE VANISHING AUDIT: Corporate Data Integrity & Spoliation of Evidence",
+    "Dave \u2014 CASE 2: PHANTOM VENDORS: Whistleblower Protection & Internal Controls",
+    "Tyrone \u2014 CASE 1: THE CEO'S SIGNATURE: Executive Accountability & Sarbanes-Oxley Compliance",
+    "Tyrone \u2014 CASE 2: THE ILLUSION OF GROWTH: Investor Transparency & Misleading Projections",
+    "Dave \u2014 CASE 3: THE SILENCED CLERK: Workplace Retaliation & Duty to Report Fraud",
+    "Tyrone \u2014 CASE 3: THE PAPER TRAIL: Corporate Expense Abuse & Internal Controls",
+    "Tyrone \u2014 CASE 4: THE WHISTLEBLOWER SPIN: Administrative Due Diligence & Governance",
+    "Tyrone \u2014 CASE 5: THE REAL ARCHITECT: Corporate Reform vs. Strategic Scapegoating"
+  ],
+  "endings": [
+    "DAVE_VICTORY",
+    "TRUE_ENDING"
+  ]
+}

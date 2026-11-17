@@ -1,0 +1,95 @@
+{
+  "folders": {
+    "root": "assets",
+    "bg": "assets/bg",
+    "char": "assets/char",
+    "icon": "assets/icon",
+    "sounds": "assets/sounds"
+  },
+  "app_icon": "app_icon.png",
+  "sounds": {
+    "speak": "speak.wav",
+    "hold_it": "hold_it.wav",
+    "objection": "objection.wav"
+  },
+  "backgrounds": {
+    "courtroom": {
+      "file": "bg_courtroom.png",
+      "size": [800, 600]
+    },
+    "title_logo": {
+      "file": "title_logo.png",
+      "size": [485, 175]
+    }
+  },
+  "characters": {
+    "Dave": {
+      "folder": "dave",
+      "size": [430, 410],
+      "poses": {
+        "idle": "dave.png",
+        "point": "dave_point.png",
+        "smile": "dave_smile.png",
+        "think": "dave_think.png"
+      }
+    },
+    "Tyrone": {
+      "folder": "tyrone",
+      "size": [430, 410],
+      "poses": {
+        "idle": "tyrone.png",
+        "point": "tyrone_point.png",
+        "smile": "tyrone_smile.png",
+        "think": "tyrone_think.png"
+      }
+    },
+    "Kendall": {
+      "folder": "kendall",
+      "size": [430, 410],
+      "poses": {
+        "idle": "kendall.png",
+        "point": "kendall_point.png",
+        "smile": "kendall_smile.png",
+        "think": "kendall_think.png"
+      }
+    },
+    "Elijah": {
+      "folder": "elijah",
+      "size": [430, 410],
+      "poses": {
+        "idle": "elijah.png",
+        "point": "elijah_point.png",
+        "smile": "elijah_smile.png",
+        "think": "elijah_think.png"
+      }
+    },
+    "Dwyane": {
+      "folder": "dwyane",
+      "size": [430, 410],
+      "poses": {
+        "idle": "dwyane.png"
+      }
+    },
+    "CFO": {
+      "folder": "cfo",
+      "size": [430, 410],
+      "poses": {
+        "idle": "cfo.png"
+      }
+    },
+    "Accountant": {
+      "folder": "accountant",
+      "size": [430, 410],
+      "poses": {
+        "idle": "accountant.png"
+      }
+    },
+    "Employee": {
+      "folder": "employee",
+      "size": [430, 410],
+      "poses": {
+        "idle": "employee.png"
+      }
+    }
+  }
+}
