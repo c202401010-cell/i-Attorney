@@ -15,17 +15,47 @@
   "backgrounds": {
     "courtroom": {
       "file": "bg_courtroom.png",
-      "size": [800, 600]
+      "size": [
+        800,
+        600
+      ]
+    },
+    "title_bg": {
+      "file": "title_bg.png",
+      "size": [
+        800,
+        600
+      ]
     },
     "title_logo": {
       "file": "title_logo.png",
-      "size": [485, 175]
+      "size": [
+        440,
+        180
+      ]
     }
+  },
+  "title_logo": {
+    "file": "title_logo.png",
+    "size": [
+      485,
+      175
+    ]
+  },
+  "title_bg": {
+    "file": "title_bg.png",
+    "size": [
+      800,
+      600
+    ]
   },
   "characters": {
     "Dave": {
       "folder": "dave",
-      "size": [430, 410],
+      "size": [
+        430,
+        410
+      ],
       "poses": {
         "idle": "dave.png",
         "point": "dave_point.png",
@@ -35,7 +65,10 @@
     },
     "Tyrone": {
       "folder": "tyrone",
-      "size": [430, 410],
+      "size": [
+        430,
+        410
+      ],
       "poses": {
         "idle": "tyrone.png",
         "point": "tyrone_point.png",
@@ -45,7 +78,10 @@
     },
     "Kendall": {
       "folder": "kendall",
-      "size": [430, 410],
+      "size": [
+        430,
+        410
+      ],
       "poses": {
         "idle": "kendall.png",
         "point": "kendall_point.png",
@@ -55,7 +91,10 @@
     },
     "Elijah": {
       "folder": "elijah",
-      "size": [430, 410],
+      "size": [
+        430,
+        410
+      ],
       "poses": {
         "idle": "elijah.png",
         "point": "elijah_point.png",
@@ -65,30 +104,55 @@
     },
     "Dwyane": {
       "folder": "dwyane",
-      "size": [430, 410],
+      "size": [
+        430,
+        410
+      ],
       "poses": {
-        "idle": "dwyane.png"
+        "idle": "dwyane.png",
+        "sigh": "dwyane_sigh.png",
+        "stare": "dwyane_stare.png"
       }
     },
     "CFO": {
       "folder": "cfo",
-      "size": [430, 410],
+      "size": [
+        430,
+        410
+      ],
       "poses": {
-        "idle": "cfo.png"
+        "idle": "cfo.png",
+        "angry": "cfo_angry.png",
+        "laugh": "cfo_laugh.png",
+        "worried": "cfo_worried.png"
       }
     },
     "Accountant": {
       "folder": "accountant",
-      "size": [430, 410],
+      "size": [
+        430,
+        410
+      ],
       "poses": {
-        "idle": "accountant.png"
+        "idle": "accountant.png",
+        "relief": "accountant_relief.png",
+        "shocked": "accountant_shocked.png",
+        "smile": "accountant_smile.png",
+        "worried": "accountant_worried.png"
       }
     },
     "Employee": {
       "folder": "employee",
-      "size": [430, 410],
+      "size": [
+        430,
+        410
+      ],
       "poses": {
-        "idle": "employee.png"
+        "idle": "employee.png",
+        "relief": "employee_relief.png",
+        "shocked": "employee_shocked.png",
+        "smile": "employee_smile.png",
+        "worried": "employee_worried.png"
       }
     }
   }
