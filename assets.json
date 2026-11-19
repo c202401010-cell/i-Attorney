@@ -155,5 +155,28 @@
         "worried": "employee_worried.png"
       }
     }
+  },
+  "shouts": {
+    "OBJECTION!": {
+      "file": "objection.png",
+      "size": [
+        790,
+        560
+      ]
+    },
+    "TAKE THAT!": {
+      "file": "take_that.png",
+      "size": [
+        790,
+        560
+      ]
+    },
+    "HOLD IT!": {
+      "file": "hold_it.png",
+      "size": [
+        790,
+        560
+      ]
+    }
   }
 }

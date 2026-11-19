@@ -39,7 +39,7 @@ CRIMSON = (150, 22, 36)
 PURPLE_ACCENT = (175, 110, 245)
 GRAY = (150, 160, 175)
 
-font_shout = pygame.font.SysFont("arial", 72, bold=True)
+font_shout = pygame.font.SysFont("impact,arialblack,arial", 128, bold=True)
 font_title = pygame.font.SysFont("arial", 44, bold=True)
 font_menu = pygame.font.SysFont("georgia,timesnewroman", 26, bold=True)
 font_logo_word = pygame.font.SysFont("georgia,timesnewroman", 54, bold=True)
@@ -222,6 +222,11 @@ DEFAULT_MANIFEST = {
         "courtroom": {"file": "bg_courtroom.png", "size": [800, 600]},
         "title_bg": {"file": "title_bg.png", "size": [800, 600]},
         "title_logo": {"file": "title_logo.png", "size": [560, 230]}
+    },
+    "shouts": {
+        "OBJECTION!": {"file": "objection.png", "size": [790, 560]},
+        "TAKE THAT!": {"file": "take_that.png", "size": [790, 560]},
+        "HOLD IT!": {"file": "hold_it.png", "size": [790, 560]}
     },
     "characters": {
         "Dave": {
@@ -595,6 +600,15 @@ class AssetManager:
                 bgs_block[bkey] = copy.deepcopy(bdef)
                 manifest_updated = True
 
+        shouts_block = self.data.setdefault("shouts", {})
+        for skey, sdef in DEFAULT_MANIFEST["shouts"].items():
+            if skey not in shouts_block:
+                shouts_block[skey] = copy.deepcopy(sdef)
+                manifest_updated = True
+            elif shouts_block[skey].get("size") in ([540, 220], [760, 440]):
+                shouts_block[skey]["size"] = list(sdef["size"])
+                manifest_updated = True
+
         chars_block = self.data.setdefault("characters", {})
         for cname, cdef in DEFAULT_MANIFEST["characters"].items():
             if cname not in chars_block:
@@ -624,6 +638,7 @@ class AssetManager:
             os.makedirs(path, exist_ok=True)
 
         self.backgrounds = {}
+        self.shouts = {}
         self.characters = {}
         self.sounds = {}
         self._load_all()
@@ -641,7 +656,17 @@ class AssetManager:
                     return os.path.join(folder, entry)
         return None
 
-    def _load_surface(self, base_dir, filename, size, fallback_color, label="", optional=False, trim_vertical=False):
+    def _load_surface(
+        self,
+        base_dir,
+        filename,
+        size,
+        fallback_color,
+        label="",
+        optional=False,
+        trim_vertical=False,
+        preserve_aspect=False
+    ):
         found_path = self._find_file_case_insensitive(base_dir, filename)
         if found_path:
             try:
@@ -650,6 +675,14 @@ class AssetManager:
                     bbox = img.get_bounding_rect()
                     if bbox.width > 0 and bbox.height > 0:
                         img = img.subsurface(pygame.Rect(0, bbox.top, img.get_width(), bbox.height)).copy()
+                if preserve_aspect:
+                    bbox = img.get_bounding_rect()
+                    if bbox.width > 0 and bbox.height > 0:
+                        img = img.subsurface(bbox).copy()
+                    iw, ih = img.get_size()
+                    ratio = min(size[0] / max(1, iw), size[1] / max(1, ih))
+                    target_size = (max(1, int(iw * ratio)), max(1, int(ih * ratio)))
+                    return pygame.transform.smoothscale(img, target_size)
                 return pygame.transform.smoothscale(img, tuple(size))
             except Exception as e:
                 print(f"[ASSETS] Error loading {found_path}: {e}")
@@ -681,6 +714,11 @@ class AssetManager:
                 self.backgrounds[bg_key] = self._load_surface(
                     self.bg_dir, cfg["file"], cfg["size"], (26, 36, 58)
                 )
+
+        for shout_key, cfg in self.data.get("shouts", {}).items():
+            self.shouts[shout_key] = self._load_surface(
+                self.bg_dir, cfg["file"], cfg["size"], GOLD, optional=True, preserve_aspect=True
+            )
 
         palette = {
             "Dave": (35, 95, 195),
@@ -777,6 +815,62 @@ class AssetManager:
             if alt in char_poses:
                 return char_poses[alt]
         return char_poses.get("idle")
+
+
+def draw_ace_attorney_shout(surface, shout_text, shout_color, shout_img, progress_elapsed, tick):
+    """Renders an oversized Ace Attorney shout graphic with heavy screen-shake and slam impact."""
+    cx, cy = WIDTH // 2, HEIGHT // 2
+
+    dim = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+    dim.fill((0, 0, 0, 120))
+    surface.blit(dim, (0, 0))
+
+    # Slam-in scale (1.48x -> 1.0x over first 6 frames) + intense Ace Attorney vibration
+    slam_scale = 1.0 + max(0.0, (6 - progress_elapsed) * 0.08)
+    shake_decay = max(0.35, 1.0 - (progress_elapsed / 75.0))
+    jx = int((math.sin(tick * 3.7) * 14 + math.cos(tick * 5.3) * 6) * shake_decay)
+    jy = int((math.cos(tick * 4.1) * 12 + math.sin(tick * 6.1) * 5) * shake_decay)
+
+    if shout_img:
+        sw = max(1, int(shout_img.get_width() * slam_scale))
+        sh = max(1, int(shout_img.get_height() * slam_scale))
+        scaled_img = pygame.transform.smoothscale(shout_img, (sw, sh)) if slam_scale > 1.001 else shout_img
+        surface.blit(scaled_img, (cx - sw // 2 + jx, cy - sh // 2 + jy))
+        return
+
+    # Full-screen jagged speech bubble fallback when PNG is not present
+    num_spikes = 22
+    outer_pts = []
+    inner_pts = []
+    rx_outer, ry_outer = int(410 * slam_scale), int(275 * slam_scale)
+    rx_inner, ry_inner = int(390 * slam_scale), int(258 * slam_scale)
+    for i in range(num_spikes):
+        ang = 2 * math.pi * i / num_spikes
+        spike = 1.0 if i % 2 == 0 else 0.74
+        ox = cx + jx + int(math.cos(ang) * rx_outer * spike)
+        oy = cy + jy + int(math.sin(ang) * ry_outer * spike)
+        ix = cx + jx + int(math.cos(ang) * rx_inner * spike)
+        iy = cy + jy + int(math.sin(ang) * ry_inner * spike)
+        outer_pts.append((ox, oy))
+        inner_pts.append((ix, iy))
+
+    pygame.draw.polygon(surface, BLACK, outer_pts)
+    pygame.draw.polygon(surface, WHITE, inner_pts)
+    pygame.draw.polygon(surface, shout_color, inner_pts, 9)
+
+    base_txt = font_shout.render(shout_text, True, shout_color)
+    shadow_txt = font_shout.render(shout_text, True, BLACK)
+    tw = max(1, int(base_txt.get_width() * slam_scale))
+    th = max(1, int(base_txt.get_height() * slam_scale))
+    if slam_scale > 1.001:
+        base_txt = pygame.transform.smoothscale(base_txt, (tw, th))
+        shadow_txt = pygame.transform.smoothscale(shadow_txt, (tw, th))
+
+    tx = cx - tw // 2 + jx
+    ty = cy - th // 2 + jy
+    for ox, oy in ((-6, -6), (6, -6), (-6, 6), (6, 6), (8, 9)):
+        surface.blit(shadow_txt, (tx + ox, ty + oy))
+    surface.blit(base_txt, (tx, ty))
 
 
 def draw_title_chamber_backdrop(surface):
@@ -948,7 +1042,9 @@ def main():
     shout_text = ""
     shout_color = GOLD
     shout_timer = 0
+    shout_duration = 72
     shake_timer = 0
+    shake_intensity = 10
     flash_timer = 0
     flash_color = WHITE
 
@@ -1011,12 +1107,14 @@ def main():
             return "DAVE_VICTORY"
         return "TYRONE_VICTORY"
 
-    def trigger_shout(text, color=GOLD, shake=20, hold=65, snd_key=None, flash=10):
-        nonlocal shout_text, shout_color, shout_timer, shake_timer, input_lock_timer, flash_timer, flash_color
+    def trigger_shout(text, color=GOLD, shake=42, hold=72, snd_key=None, flash=14):
+        nonlocal shout_text, shout_color, shout_timer, shout_duration, shake_timer, shake_intensity, input_lock_timer, flash_timer, flash_color
         shout_text = text
         shout_color = color
         shout_timer = hold
+        shout_duration = hold
         shake_timer = shake
+        shake_intensity = 22
         flash_timer = flash
         flash_color = WHITE
         input_lock_timer = hold
@@ -1030,24 +1128,25 @@ def main():
             trigger_shout(
                 "TAKE THAT!",
                 ORANGE_SPARK,
-                shake=26 if is_correct else 22,
-                hold=68,
+                shake=48 if is_correct else 42,
+                hold=74,
                 snd_key="take_that",
-                flash=12 if is_correct else 10
+                flash=14 if is_correct else 12
             )
         else:
             trigger_shout(
                 "OBJECTION!",
                 BLUE_ACCENT,
-                shake=26 if is_correct else 22,
-                hold=68,
+                shake=48 if is_correct else 42,
+                hold=74,
                 snd_key="objection",
-                flash=12 if is_correct else 10
+                flash=14 if is_correct else 12
             )
 
-    def trigger_impact(shake=14, flash=8, color=WHITE, play_bang=False):
-        nonlocal shake_timer, flash_timer, flash_color
+    def trigger_impact(shake=14, flash=8, color=WHITE, play_bang=False, intensity=10):
+        nonlocal shake_timer, shake_intensity, flash_timer, flash_color
         shake_timer = max(shake_timer, shake)
+        shake_intensity = max(shake_intensity, intensity)
         flash_timer = max(flash_timer, flash)
         flash_color = color
         if play_bang:
@@ -1059,7 +1158,7 @@ def main():
         gameover_anim_tick = 0
         input_lock_timer = 35
         assets.play_sound("whoops", stop_previous=True)
-        trigger_impact(shake=26, flash=14, color=RED)
+        trigger_impact(shake=26, flash=14, color=RED, intensity=14)
 
     def enter_case_verdict():
         nonlocal scene, verdict_anim_tick, input_lock_timer
@@ -1067,7 +1166,7 @@ def main():
         verdict_anim_tick = 0
         input_lock_timer = 22
         assets.play_sound("testimony", stop_previous=True)
-        trigger_impact(shake=8, flash=8, color=GOLD)
+        trigger_impact(shake=8, flash=8, color=GOLD, intensity=8)
 
     def start_credits():
         def _open_credits():
@@ -1122,9 +1221,9 @@ def main():
             assets.play_sound("realization", stop_previous=True)
         else:
             if low_line.startswith("objection"):
-                trigger_shout("OBJECTION!", BLUE_ACCENT, shake=20, hold=48, snd_key="objection", flash=10)
+                trigger_shout("OBJECTION!", BLUE_ACCENT, shake=42, hold=58, snd_key="objection", flash=12)
             elif low_line.startswith("hold it"):
-                trigger_shout("HOLD IT!", GOLD, shake=16, hold=45, snd_key="hold_it", flash=8)
+                trigger_shout("HOLD IT!", GOLD, shake=36, hold=54, snd_key="hold_it", flash=10)
             elif pose in ("point", "angry", "shocked", "stare") or any(
                 kw in low_line for kw in ("impossible!", "lies!", "no way!", "contradiction", "fabricated", "red-handed", "guilty", "checkmate")
             ):
@@ -1302,6 +1401,8 @@ def main():
                 shout_timer -= 1
             if shake_timer > 0:
                 shake_timer -= 1
+            else:
+                shake_intensity = 10
             if flash_timer > 0:
                 flash_timer -= 1
             if input_lock_timer > 0:
@@ -1484,7 +1585,7 @@ def main():
                                 input_lock_timer = 8
                             elif event.key == pygame.K_h:
                                 cur_stmt = statements[stmt_idx]
-                                trigger_shout("HOLD IT!", GOLD, shake=18, hold=60, snd_key="hold_it", flash=8)
+                                trigger_shout("HOLD IT!", GOLD, shake=40, hold=68, snd_key="hold_it", flash=12)
                                 press_lines = list(cur_stmt["press"])
                                 if not cur_stmt.get("pressed_bonus"):
                                     cur_stmt["pressed_bonus"] = True
@@ -2129,7 +2230,6 @@ def main():
                 page_obj = CREDITS_PAGES[credits_page_idx]
                 total_pages = len(CREDITS_PAGES)
 
-                # Subtle golden border frame
                 frame = pygame.Rect(42, 36, WIDTH - 84, HEIGHT - 72)
                 pygame.draw.rect(canvas, PURE_BLACK, frame, border_radius=14)
                 pygame.draw.rect(canvas, GOLD if page_obj["page"] == 9 else BLUE_ACCENT, frame, 2, border_radius=14)
@@ -2150,7 +2250,7 @@ def main():
                         pygame.draw.rect(canvas, DARK_NAVY, m_rect, border_radius=12)
                         pygame.draw.rect(canvas, CYAN, m_rect, 2, border_radius=12)
 
-                        # Always display the original base character photo (idle pose: e.g., dwyane.png)
+                        # Displays original base character photo (idle pose: e.g., dwyane.png)
                         base_spr = assets.get_char_sprite(member["char"], "idle")
                         if base_spr:
                             scaled_spr = pygame.transform.smoothscale(base_spr, (215, 240))
@@ -2173,7 +2273,6 @@ def main():
                             center_x=col_center_x
                         )
                 else:
-                    # Centered solo title/acknowledgement pages (Pages 1-4 and Page 9)
                     main_line = page_obj["lines"][0] if page_obj["lines"] else ""
                     title_font = font_title if page_obj["page"] == 9 else font_sub
                     color_main = GOLD if page_obj["page"] == 9 else WHITE
@@ -2201,15 +2300,14 @@ def main():
                 canvas.blit(nav_surf, (WIDTH // 2 - nav_surf.get_width() // 2, HEIGHT - 64))
 
             if shout_timer > 0:
-                dim = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-                dim.fill((0, 0, 0, 110))
-                canvas.blit(dim, (0, 0))
-
-                banner_rect = pygame.Rect(110, 215, 580, 120)
-                pygame.draw.rect(canvas, BLACK, banner_rect, border_radius=14)
-                pygame.draw.rect(canvas, shout_color, banner_rect, 5, border_radius=14)
-                s_surf = font_shout.render(shout_text, True, shout_color)
-                canvas.blit(s_surf, (WIDTH // 2 - s_surf.get_width() // 2, 235))
+                draw_ace_attorney_shout(
+                    canvas,
+                    shout_text,
+                    shout_color,
+                    assets.shouts.get(shout_text),
+                    max(0, shout_duration - shout_timer),
+                    tick
+                )
 
             if flash_timer > 0:
                 flash_surf = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
@@ -2225,8 +2323,12 @@ def main():
             vp = get_viewport_rect(win_w, win_h)
             shake_scale_x = vp.width / WIDTH
             shake_scale_y = vp.height / HEIGHT
-            offset_x = int(math.sin(tick * 1.9) * 8 * shake_scale_x) if shake_timer > 0 else 0
-            offset_y = int(math.cos(tick * 2.3) * 6 * shake_scale_y) if shake_timer > 0 else 0
+            if shake_timer > 0:
+                offset_x = int((math.sin(tick * 3.1) * shake_intensity + math.cos(tick * 5.7) * (shake_intensity * 0.45)) * shake_scale_x)
+                offset_y = int((math.cos(tick * 3.7) * (shake_intensity * 0.85) + math.sin(tick * 6.3) * (shake_intensity * 0.4)) * shake_scale_y)
+            else:
+                offset_x = 0
+                offset_y = 0
 
             screen.fill(PURE_BLACK)
             if vp.size == (WIDTH, HEIGHT):
